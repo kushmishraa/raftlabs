@@ -1,18 +1,51 @@
 import TextField from '@mui/material/TextField';
 import { Box, Button } from '@mui/material';
-import { FormEvent, useState } from 'react';
-import { Link } from 'react-router-dom'
+import React, { FormEvent, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
+type userDataType = {
+   email : string,
+   password :string 
+}
+
+
 export const Login  = ()=>{
     const [loginDetails , setLoginDetails] = useState({});
+    const navigate = useNavigate();
+    const userVerification = async (userData : userDataType) =>{    
+       const {email , password} = userData;
+       console.log(email , password)
+       
+       try{
+        const res = await fetch("/login-validation" , {
+        method : "POST",
+        headers : {
+            Accept : "application/json",
+            "Content-Type" : 'application/json',
+        },
+        body : JSON.stringify({
+            email : email,
+            password : password
+        }),
+        credentials : 'include'
+       });
+
+       const data = await res.json();
+       if(res.status == 201){
+            navigate("/home");
+       }
+       console.log(data);
+    }
+    catch(err){
+        console.log(err);
+    }
+}
 
     const handleFormSubmit = (e : React.FormEvent<HTMLFormElement>) =>{
         e.preventDefault();
-       //storing login details
-        setLoginDetails({
-            email : e.currentTarget.email.value,
-            password : e.currentTarget.password.value
-        })
-        console.log(loginDetails)
+        const {email , password} = e.currentTarget
+        userVerification({email : email.value , password : password.value})
     }
     return(
        <Box sx={{height : '100%'}}>
