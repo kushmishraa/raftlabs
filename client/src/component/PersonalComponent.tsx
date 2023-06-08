@@ -1,43 +1,11 @@
 import { Avatar } from "@mui/material";
 import { useEffect , useState} from "react";
-
-type userDataType = {
-    authToken : string,
-    fname : string,
-    email : string,
-    lname : string,
-    number : string,
-    post : object,
-    userPost :object,
-    profilePicture : string
-
+import { userDataType } from "./Home";
+type Props={
+    userData : userDataType 
 }
-
-export const PersonalComonent = () =>{
-    const initData = {
-        authToken : "",
-        fname : "",
-        email : "",
-        lname : "",
-        number : "",
-        post : {},
-        userPost :{},
-        profilePicture : ""
-    }
-    const [userData  , setUserData] = useState<userDataType>(initData) ;
-
-    const fetchUserData = async () =>
-        {
-            const res = await fetch('/home' , {method : "GET"});
-            const data = await res.json();
-            console.log(data)
-            setUserData(data);
-        }
-
-    useEffect(()=>{
-        fetchUserData() ; 
-    },[])
-
+export const PersonalComonent = (props : Props) =>{
+const userData = props.userData;
     return(
         <div className="w-full h-screen">
             <div>

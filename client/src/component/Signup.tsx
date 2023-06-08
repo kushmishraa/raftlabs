@@ -7,9 +7,10 @@ import {useNavigate} from 'react-router-dom'
 type userDataType = {
     fname : string,
     lname : String,
+    username : String,
     email : String,
     number : String,
-    password : String
+    password : String 
 }
 
 export const Signup = () =>{
@@ -19,7 +20,7 @@ export const Signup = () =>{
 
     const signupUser = async (userData : userDataType) =>{
 
-        const {fname , lname , email , number , password} = userData;
+        const {fname , lname , email , number , password , username} = userData;
         console.log(fname,lname,email,number,password);
       
       try{  
@@ -34,7 +35,8 @@ export const Signup = () =>{
             "lname" : lname,
             "email" : email,
             "number" : number,
-            "password" : password
+            "password" : password,
+            "username" : username
            }),
             credentials: 'include' // should be there
         
@@ -75,12 +77,14 @@ export const Signup = () =>{
        const password = e.currentTarget.password.value;
        const cpassword = e.currentTarget.cpassword.value;
        const email = e.currentTarget.email.value;
+       const username = e.currentTarget.username.value;
         if(password != cpassword){
             return
         }
        const userData = {
         fname : fname,
         lname : lname,
+        username : username,
         number : number,
         password : password,
         cpassword : cpassword,
@@ -120,15 +124,26 @@ export const Signup = () =>{
                     sx={{width:'50%'}}
                     name='lname'/>
 
-                    <TextField
+                   <TextField
                     required
                     id="emailAddress"
                     label="Email Address"
                     type="email"
                     variant='outlined'
                     sx={{width:'50%'}}
-                    name='email'
+                    name="email"
                     />
+                    
+                    <TextField
+                    required
+                    id="username"
+                    label="Username"
+                    type="text"
+                    variant='outlined'
+                    sx={{width:'50%'}}
+                    name='username'
+                    />
+
                     <TextField
                     required
                     id="number"

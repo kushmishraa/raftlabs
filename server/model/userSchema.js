@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
         type : String,
         required : false
     },
+    username : {
+        type : String,
+        require : true
+    },
     userPost : {
                 postContainer : [
                     {
@@ -44,12 +48,28 @@ const userSchema = new mongoose.Schema({
                                 required : false
                             }
                         ],
-                        comments :{
-                            type : String,
-                            required : false
-                        },
-                        like : {
-                            type : Number,
+                        comments :[
+                            {
+                                from : {
+                                    type : String,
+                                    required : false
+                                },
+                                comment : {
+                                    type : String,
+                                    required : false,
+                                }
+                            }
+                        ],
+                        like :[
+                            {
+                                user:{
+                                    type : String,
+                                    required : false
+                                }
+                            }
+                        ],
+                        date : {
+                            type : Date,
                             required : false
                         }
                     }
@@ -59,7 +79,13 @@ const userSchema = new mongoose.Schema({
     profilePicture : {
         type : String,
         required : false
-    }
+    },
+    following : [
+        {
+            type : String,
+            required : false
+        }
+    ]
 })
 
 userSchema.pre('save',async function(next){

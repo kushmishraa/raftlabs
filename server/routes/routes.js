@@ -23,17 +23,22 @@ try{
 const upload = multer({ storage: storage })
 
 router.post('/register-user' , async (req , res)=>{
-    const {fname , lname , email , number , password} = req.body
+    const {fname , lname , email , number , password , username} = req.body
     try{
         const userExists = await User.findOne({email : email});
+        const usernameExists = await User.findOne({username : username});
         if(userExists){
             return res.status(403).json({message : "User already Exits"});
+        }
+
+        if(usernameExists){
+            return res.status(400).json({message : "Username already Exists"})
         }
 
         else
         {
 
-        const newUser = new User({fname , lname , email , number , password});
+        const newUser = new User({fname , lname , email , number , password , username});
 
         //password encryption
 
@@ -91,15 +96,18 @@ router.post('/login-validation' , async (req , res) =>{
 
 router.post("/upload", upload.single('image') , async (req , res)=>{
     
-    
-    if(req.file == undefined) return res.status(402).json({message : "no body failed"});
-    const localFilePath = req.file.path;
-    const result = await uploadToCloudinary(localFilePath,req.file);
-    if(result){
+
+    const userToken = req.cookies.jwtToken;
+    const verifyToken = jwt.verify(userToken , process.env.SECRETKEY);
+    const selectedUser = await User.findOne({"authToken" : userToken});
+
+    if(req.file){
+        const localFilePath = req.file.path;
+        const result = await uploadToCloudinary(localFilePath,req.file);
+
         if(req.body.isProfilePic == "true"){
             const selectedUser = await User.findOne({email : req.body.email})
             selectedUser.profilePicture = result.url;
-            console.log(selectedUser);
             const profilPicChanged = selectedUser.save()
             if(profilPicChanged){
                 return res.status(201).json({message : "Profile pic updated"})
@@ -108,31 +116,69 @@ router.post("/upload", upload.single('image') , async (req , res)=>{
                 return res.status(400).json({message : 'Unable to updated profile pic'})
             }
         }
-       const userToken = req.cookies.jwtToken;
-       const verifyToken = jwt.verify(userToken , process.env.SECRETKEY);
-       if(verifyToken){
-        const selectedUser = await User.findOne({"authToken" : userToken});
-        if(selectedUser){
-            selectedUser.userPost.postContainer.push({image : result.url})
-            selectedUser.save();
-           res.status(201).json({message : "image added successfully"})
-        }
-       }else{
-        return res.status(201).json({message : "unable to authenticate"})
-       }
+        
+        
+        if(verifyToken){
+           
+            if(selectedUser){
+                selectedUser.userPost.postContainer.push({
+                    image : result.url , 
+                    caption : req.body.caption? req.body.caption:"",
+                    tagged : req.body.tagged? req.body.tagged:[],
+                    comments : req.body.comments ? req.body.comments : [],
+                    like : req.body.like ? req.body.like : [],
+                    date : req.body.date ? req.body.date : ""
+                })
+                selectedUser.save();
+                res.status(201).json({message : "post created successfull"})
+            }
+         }
 
-    }else{
-        return res.status(400).json({message : "unable to upload image"})
+        else{
+            return res.status(201).json({message : "unable to authenticate"})
+        }
+
+        }
+
+    })
+router.get("/findPeople" , async (req , res) =>{
+    const allUser = await User.find({});
+    res.status(201).json({users : allUser});
+ 
+})
+router.post('/followUser' , async (req , res)=>{
+    const userName=req.body.username;
+    const userExists = await User.findOne({username : userName});
+    if(userExists){
+        const jwtToken = req.cookies.jwtToken;
+        const loggedInUser = await User.findOne({"authToken" : jwtToken});
+        const alreadyFollowing = loggedInUser.following?.indexOf(userName)
+        console.log("alreadyFollowing => " , alreadyFollowing)
+        if(alreadyFollowing >=0){
+            loggedInUser.following.splice(alreadyFollowing , 1);
+            loggedInUser.save();
+            return res.status(201).json({message : "User unfollowed Sucessfully"})
+        }
+        loggedInUser.following.push(userName);
+        loggedInUser.save()
+        return res.status(201).json({message : "followed successfully"});
+    }
+
+   return res.status(400).json({message : "Username doesn't found"});
+})
+router.post('/getFollowerPost', async (req , res)=>{
+    const username  = req.body.username;
+    console.log(username)
+    const availUser = await User.findOne({"username" : username})
+    if(availUser){
+        return res.status(201).json({post : availUser.userPost.postContainer , profilePicture : availUser.profilePicture});
     }
 })
 }
 
-
-
-
-catch(err){
-    console.log(err);
-}
+    catch(err){
+        console.log(err);
+    }
 
 
 module.exports = router;
