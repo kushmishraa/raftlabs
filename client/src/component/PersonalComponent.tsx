@@ -1,17 +1,21 @@
-import { Avatar } from "@mui/material";
+import { Avatar, Button } from "@mui/material";
 import { useEffect , useState} from "react";
 import { userDataType } from "./Home";
 type Props={
-    userData : userDataType 
+    userData : userDataType ,
+    setHomeview : Function
 }
 export const PersonalComonent = (props : Props) =>{
 const userData = props.userData;
+const setHomeView = props.setHomeview;
     return(
-        <div className="w-full h-screen">
+        <div className="w-full h-screen flex flex-col justify-center">
             <div>
               <div>
-                <h1>name : {userData ? userData.fname : "loading"}</h1>
-                <Avatar src={userData ? userData.profilePicture : "none"} sx={{width : "40%",height: "40%"}}/>
+                <img src={userData.profilePicture} />
+              </div>
+              <div>
+                <Button variant = "outlined" sx={{width : "100%"}} onClick={()=>setHomeView("profile")}>Profile</Button>
               </div>
             </div>
         </div>

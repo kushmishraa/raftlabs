@@ -2,6 +2,7 @@ import { Feed } from "./Feed"
 import { useEffect , useState} from 'react'
 import { PersonalComonent } from "./PersonalComponent"
 import { FindPeople } from "./FindPeople"
+import { ProfilePage } from "./ProfilePage"
 
 
 export type userDataType = {
@@ -35,7 +36,7 @@ export const Home = () =>{
         following : [""]
     }
     const [userData  , setUserData] = useState<userDataType>(initData) ;
-
+    const [HomeView , setHomeView] = useState<string>("");
     const fetchUserData = async () =>
         {
             const res = await fetch('/home' , {method : "GET"});
@@ -52,11 +53,11 @@ export const Home = () =>{
         <div className="flex flex-row  bg-slate-200 w-full  h-screen items-center justify-between">
            
             <div className="bg-white h-full w-[20%] drop-shadow-xl">
-                <PersonalComonent userData={userData}/>
+                <PersonalComonent userData={userData} setHomeview={ setHomeView }/>
             </div>
 
             <div className="bg-white h-full w-[50%] drop-shadow-2xl">
-                <Feed userData={userData}/>
+                {HomeView == "profile" ? <ProfilePage userData = {userData}/> : <Feed userData={userData}/>}
             </div>
 
             <div className="bg-white h-full w-[20%] drop-shadow-xl">

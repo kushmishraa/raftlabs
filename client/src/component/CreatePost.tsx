@@ -2,6 +2,7 @@ import { Button, Input, MenuItem, OutlinedInput, Select, TextareaAutosize, Theme
 import React, { useRef, useState } from "react"
 import { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
+import { userDataType } from "./Home";
 export type postDataType = {
     caption : string,
     image : string,
@@ -14,10 +15,16 @@ export type postDataType = {
       user : string
     }[],
     date : Date,
-    profilePicture : string
+    profilePicture : string,
+    username : string
 }
 
-export const CreatePost = () =>{
+type Props={
+  userData : userDataType
+}
+
+export const CreatePost = (props : Props) =>{
+  
     const [post , setPost] = useState<postDataType>({
         caption : "",
         image : "",
@@ -25,7 +32,8 @@ export const CreatePost = () =>{
         comments : [{from:"",comment:""}],
         like : [{user:""}],
         date : new Date(),
-        profilePicture : ""
+        profilePicture : "",
+        username : ""
     });
 
     const theme = useTheme();
@@ -50,7 +58,7 @@ export const CreatePost = () =>{
         };
       }
 
-    const names = ["kush" , "kushagra" , "shubh" , "shubham"];
+    const names = props.userData.following;
 
     const handleTagged = (event: SelectChangeEvent<string[]>) => {
         const {
@@ -113,16 +121,17 @@ export const CreatePost = () =>{
 
     return (
         //post box container
-        <div className="w-full h-full flex flex-col justify-center items-center bg-stone-50 my-5">
+        <div className="w-full min-h-1/2 flex flex-col justify-center items-center bg-stone-50 my-5">
         <form onSubmit={handleFormSubmit} className="flex flex-col w-full justify-center items-center gap-5">
         <TextareaAutosize minRows={5} placeholder="create a post"
          style={{
             width : "90%",
-            padding : "2%"
+            padding : "2%",
+            border : "1px solid black"
          }}
          onChange={handleCaption}
          name="caption" />
-         <div className="flex">
+         <div className="flex gap-2 h-11">
          <Input type="file" name="image"/>
          <Select
           multiple
@@ -132,7 +141,7 @@ export const CreatePost = () =>{
           input={<OutlinedInput />}
           renderValue={(selected) => {
             if (selected.length === 0) {
-              return <em>Placeholder</em>;
+              return <em>Tag Pepole</em>;
             }
 
             return selected.join(', ');
@@ -140,6 +149,12 @@ export const CreatePost = () =>{
           MenuProps={MenuProps}
           inputProps={{ 'aria-label': 'Without label' }}
           name="tagged"
+          style={{
+            overflowX : "hidden",
+            overflowY : "hidden",
+            maxWidth : "200px",
+            minWidth : "200px"
+          }}
         >
           <MenuItem disabled value="">
             <em>Placeholder</em>

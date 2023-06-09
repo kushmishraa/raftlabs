@@ -171,8 +171,67 @@ router.post('/getFollowerPost', async (req , res)=>{
     console.log(username)
     const availUser = await User.findOne({"username" : username})
     if(availUser){
-        return res.status(201).json({post : availUser.userPost.postContainer , profilePicture : availUser.profilePicture});
+        return res.status(201).json({post : availUser.userPost.postContainer , profilePicture : availUser.profilePicture , username : availUser.username});
     }
+})
+
+router.post('/like',async (req , res)=>{
+    const username = req.body.username;
+    const likedBy = req.body.likedBy;
+    console.log(likedBy , "liked =>" , username , "Post")
+    const img = req.body.image;
+    const validUser = await User.findOne({"username" : username});
+    if(validUser){
+        console.log("user Verified");
+        validUser.userPost.postContainer.map((posts)=>{
+            posts.image == img ? posts.like.findIndex(x=> x.user == likedBy) == -1 ? posts.like.push({user:likedBy}) : posts.like.splice(posts.like.findIndex(x=> x.user == likedBy),1) : null;
+          })
+          validUser.save();
+          return res.status(201).json({message : "Post Liked"})
+    
+    }
+    return res.status(400).json({message : "Request failed"})
+})
+
+router.post('/fetch-comments' , async (req ,res)=>{
+    const username = req.body.username;
+    console.log(username);
+    const img = req.body.image;
+    console.log(img)
+    const validUser = await User.findOne({"username" : username});
+    if(validUser){
+        console.log("user Verified")
+        validUser.userPost.postContainer.map((posts)=>{
+            return  posts.image == img ? res.status(201).json({comments : posts.comments}):null
+          })
+        
+    }else{
+        return res.status(400).json({message : "User Not Found "})
+    }
+    
+})
+router.post('/add-comments', async(req , res)=>{
+    const commentedby = req.body.parentUser
+    const commentedOn = req.body.childUser
+    const img = req.body.image
+    const caption = req.body.caption
+
+    if(caption.length == 0){
+        return res.status(400).json({message : "Enter any comments"})
+    }
+
+    console.log(commentedby , commentedOn , img , caption)
+
+    const validUser = await User.findOne({"username" : commentedOn});
+    if(validUser){
+        validUser.userPost.postContainer.map((posts)=>{
+            return  posts.image == img ? posts.comments.push({from : commentedby , comment : caption}) :null
+          })
+          validUser.save()
+         return res.status(201).json({message : "comment added"})
+        }
+
+        return res.status(400).json({message : "Unable to post comment"});
 })
 }
 

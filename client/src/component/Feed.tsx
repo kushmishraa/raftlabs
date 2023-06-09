@@ -1,29 +1,46 @@
-import { useState , useEffect } from "react"
+import { useState , useEffect, useRef } from "react"
 import { CreatePost, postDataType } from "./CreatePost"
 import { userDataType } from "./Home"
-import { Avatar, Button } from "@mui/material"
+import { Avatar, Button, TextareaAutosize } from "@mui/material"
+import { CommentSection } from "./CommentSection"
 type Props={
     userData : userDataType 
 }
 export const Feed = (props : Props) =>{
 
+    const commentSectionRef = useRef<HTMLDivElement>(null)
+    const [forceRender , setForceRender] = useState<boolean>(true)
     const {userData} = props;
-    const [followedPost , setFollowedPost] = useState<Array<postDataType>>([])
+    const [followedPosts , setFollowedPost] = useState<Array<postDataType>>([]);
+    const [selectedComments , setSelectedComments] = useState<{
+        username : string,
+        image : string
+    }>({username:"",image:""});
 
     const profileFeed = (followedPost : Array<postDataType>) =>{
-          userData?.userPost?.postContainer?.map((posts : any)=>{
-            followedPost.push(posts)
+
+        const transformedArray : Array<postDataType> = [];
+        followedPost?.map((postObj:any)=>{
+            postObj.post?.map((post : any)=>transformedArray.push({...post , username : postObj.username , profilePicture : postObj.profilePicture}))
+        })
+
+        console.log("transformed array =>" , transformedArray)
+
+
+
+        userData?.userPost?.postContainer?.map( (posts:any)=>{
+            transformedArray.push({...posts , profilePicture : userData.profilePicture , username : userData.username})
+          // setFollowedPost([...followedPost,{...posts , profilePicture : userData.profilePicture}])
         });
-        followedPost.sort((a,b)=>{
+        transformedArray.sort((a,b)=>{
             return new Date(b.date).valueOf() - new Date(a.date).valueOf()
         })
-        setFollowedPost(followedPost);
+        console.log("followed post => " ,followedPost)
+        setFollowedPost(transformedArray);
     }
 
-    const followerPosts =  () =>{
-    let data : { post : Array<postDataType> , profilePicture : string} ;
-     userData.following?.map(async (username)=>{
-        console.log(username)
+    const fetchAllUser = async() => {
+        const user = await Promise.all(userData.following.map( async (username)=>{
             const res = await fetch('/getFollowerPost',{
                 method : "POST",
                 headers : {
@@ -34,49 +51,72 @@ export const Feed = (props : Props) =>{
                     "username" : username
                 })
             })
-            data = await res.json();
-            console.log("data of" , username , "=>" , data)
-            data.post.map((posts : postDataType)=>{
-                posts = {...posts , profilePicture : data.profilePicture}
-                // followedPost.push(posts)
-                setFollowedPost([...followedPost , posts])
+            const data = res.json();
+            return data
+        }))
+        profileFeed(user)
+        console.log("all user =>" , user)
+    }
+
+    const handleLike = async (username : string , image : string) =>{
+        const res = await fetch('/like',{
+            method : "POST",
+            headers : {
+                Accept : "application/json",
+                "Content-Type" : 'application/json'
+            },
+            body : JSON.stringify({
+                "username" : username,
+                "likedBy" :  userData.username,
+                "image" : image
             })
         })
-        profileFeed(followedPost)
+        const data = await res.json();
+        console.log(data);
+        setForceRender(!forceRender);
     }
     
-    // followerPosts();
+   const  openComment = (username : string , image : string) =>{
+        commentSectionRef.current?.classList.contains("hidden") ? commentSectionRef.current.classList.remove("hidden") : commentSectionRef.current?.classList.add("hidden");
+        setSelectedComments({username:username , image : image});
+    }
    
-    useEffect(()=>{
-        followerPosts();
-    },[userData])
+    useEffect(()=>{  
+        fetchAllUser();
+    },[userData , forceRender])
     return(
 
         //feed container
-        <div className="w-full h-full flex flex-col justify-center items-center overflow-y-scroll">
+        <div className="w-full h-full flex flex-col justify-center items-center overflow-y-scroll relative">
             {/* creating post */}
-            <div className="w-full h-150">
-                <CreatePost />
+            <div className="w-full">
+                <CreatePost userData={userData}/>
             </div>
 
             {/*user posts */}
-            <div className="w-full min-h-1/2 drop-shadow-2xl flex flex-col items-center">
-                {followedPost.length > 1 ? 
-                    followedPost.map((posts)=>{
+            <div className="w-full min-h-1/2 drop-shadow-2xl flex flex-col gap-y-8 justify-between items-center">
+                {followedPosts.length >= 1 ? 
+                    followedPosts.map((posts)=>{
                         return(
                           <>
                             {posts.profilePicture ? 
-                            <div className="drop-shadow-2xl bg-stone-50">
+                            <div className="drop-shadow-2xl bg-stone-50 flex flex-col max-w-638 max-h-667 " key={posts.username}>
+                            <div className="drop-shadow-xl bg-stone-50 p-1 flex items-center">
                             <Avatar
                                 alt="Remy Sharp"
                                 src={posts.profilePicture}
-                                sx={{ width: "20%", height: "20%" }}
+                                sx={{ maxWidth: "100px", maxHeight: "69px" }}
                                 />
-                            <div>
+                            <h1 style={{fontFamily : "'Montserrat', sans-serif"}}> {posts.username}</h1>
+                            </div>
+                            <div className="p-5">
                             <h2>{posts.caption}</h2>
-                            <img src={posts.image} width={"50%"} className="my-0 mx-auto"></img></div>
-                            <Button variant="contained">like</Button>
-                            <Button variant="outlined">Comment</Button>
+                            </div>
+                            <div>
+                            <img src={posts.image} width={512} className="my-0 mx-auto max-h-400"></img>
+                            </div>
+                            <Button variant={posts.like.findIndex(x=>x.user == userData.username)==-1?"outlined":"contained"} onClick={()=>handleLike(posts.username , posts.image)}>{posts.like.findIndex(x=>x.user == userData.username)==-1?"Like":"dislike"}</Button>
+                            <Button variant="outlined" onClick={()=>openComment(posts.username , posts.image)}>Comment</Button>
                             </div> : null }
                          
                             </>
@@ -84,6 +124,10 @@ export const Feed = (props : Props) =>{
                     })
                     : null
                 }
+            </div>
+            {/*Comments*/}
+            <div className="fixed hidden w-full h-100 rounded drop-shadow-2xl bg-white z-999" ref={commentSectionRef}>
+                <CommentSection username={selectedComments.username} image={selectedComments.image} openComment={openComment} userData = {userData.username}/>
             </div>
         </div>
     )
