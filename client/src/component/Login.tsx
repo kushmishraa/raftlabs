@@ -15,7 +15,7 @@ export const Login  = ()=>{
     const navigate = useNavigate();
     const userVerification = async (userData : userDataType) =>{    
        const {email , password} = userData;
-       console.log(email , password)
+     
        
        try{
         const res = await fetch("/login-validation" , {
@@ -35,7 +35,7 @@ export const Login  = ()=>{
        if(res.status == 201){
             navigate("/home");
        }
-       console.log(data);
+   
     }
     catch(err){
         console.log(err);

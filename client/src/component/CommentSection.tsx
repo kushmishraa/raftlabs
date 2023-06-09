@@ -34,7 +34,6 @@ export const CommentSection = (props : Props) =>{
         })
 
         const data = await res.json();
-        console.log(data)
         setComments(data.comments);
     }
 
@@ -57,7 +56,7 @@ export const CommentSection = (props : Props) =>{
 
        const data = await res.json();
 
-       console.log(data);
+
     }
 
     useEffect(()=>{

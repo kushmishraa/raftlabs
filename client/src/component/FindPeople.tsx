@@ -16,12 +16,15 @@ export type allUserType={
 }
 
 type Props = {
-    userData : userDataType
+    userData : userDataType,
+    isProfilePage ?: boolean
 }
 
 export const FindPeople = (props : Props) =>{
 
     const { userData } = props
+
+    const isProfilePage = props?.isProfilePage
 
     const initData = {
         users : 
@@ -45,7 +48,7 @@ export const FindPeople = (props : Props) =>{
         });
         const data = await res.json();
         setAllUser(data);
-        console.log("userData=>",data)
+
     }
     useEffect(()=>{ 
         fetchAllUser()
@@ -57,7 +60,7 @@ export const FindPeople = (props : Props) =>{
             </div>
             <div className="overflow-y-scroll">
                 {Object.keys(allUser).length == 0 ? null : allUser.users.map((user)=>{ 
-                    return userData.username == user.username ? null :  <ProfilesAtfind user={user} userData = {userData}/>
+                    return userData.username == user.username ? null : <ProfilesAtfind user={user} userData = {userData} isProfilePage={isProfilePage}/>
                 })}
                
             </div>

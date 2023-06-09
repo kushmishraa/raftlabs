@@ -21,7 +21,7 @@ export const Signup = () =>{
     const signupUser = async (userData : userDataType) =>{
 
         const {fname , lname , email , number , password , username} = userData;
-        console.log(fname,lname,email,number,password);
+     
       
       try{  
             const res = await fetch('/register-user', {
@@ -63,7 +63,7 @@ export const Signup = () =>{
         })
 
         const data = await res.json();
-        console.log(data);
+       
     }
 
     const handleFormSubmit = (e : React.FormEvent<HTMLFormElement>)=>{

@@ -17,7 +17,8 @@ export type userDataType = {
         postContainer : Array<object>
     },
     profilePicture : string,
-    following : Array<string>
+    following : Array<string>,
+    bio : string
 }
 
 export const Home = () =>{
@@ -33,15 +34,16 @@ export const Home = () =>{
             postContainer : [{}]
         },
         profilePicture : "",
-        following : [""]
+        following : [""],
+        bio : ""
     }
     const [userData  , setUserData] = useState<userDataType>(initData) ;
-    const [HomeView , setHomeView] = useState<string>("");
+    const [homeView , setHomeView] = useState<boolean>(true);
     const fetchUserData = async () =>
         {
             const res = await fetch('/home' , {method : "GET"});
             const data = await res.json();
-            console.log(data)
+     
             setUserData(data);
         }
 
@@ -53,15 +55,15 @@ export const Home = () =>{
         <div className="flex flex-row  bg-slate-200 w-full  h-screen items-center justify-between">
            
             <div className="bg-white h-full w-[20%] drop-shadow-xl">
-                <PersonalComonent userData={userData} setHomeview={ setHomeView }/>
+                <PersonalComonent userData={userData} setHomeview={ setHomeView } homeView={homeView}/>
             </div>
 
             <div className="bg-white h-full w-[50%] drop-shadow-2xl">
-                {HomeView == "profile" ? <ProfilePage userData = {userData}/> : <Feed userData={userData}/>}
+                { !homeView  ? <ProfilePage userData = {userData} setHomeView={setHomeView} /> : <Feed userData={userData}/>}
             </div>
 
             <div className="bg-white h-full w-[20%] drop-shadow-xl">
-                <FindPeople userData = {userData}/>
+                <FindPeople userData = {userData} />
             </div>
 
         </div>  

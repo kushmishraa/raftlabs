@@ -68,14 +68,14 @@ router.get('/home' , loginValidation , (req,res)=>{
 
 router.post('/login-validation' , async (req , res) =>{
     const {email , password} = req.body;
-    console.log(email,password);
+    
     const userExist = await User.findOne({email : email});
-    console.log(userExist)
+   
     if(userExist){
        const validUser= await bcrypt.compare(password , userExist.password);
        if(validUser){
         const token = await userExist.generateAuthToken();
-        console.log("token=>" , token);
+     
         res.cookie('jwtToken' , token , {
             expires : new Date(Date.now() + 2592000000),
             httpOnly : true,
@@ -83,13 +83,13 @@ router.post('/login-validation' , async (req , res) =>{
        return res.status(201).json({message : "User verified successfully"});
        }
        else{
-        console.log("line 50")
+     
         return res.status(400).json({message : "Invalid Credential"})
        }
         
     }
     else{
-        console.log("line 57")
+       
         res.status(400).json({message : "Invalid Credentials"});
     }
 })
@@ -153,7 +153,7 @@ router.post('/followUser' , async (req , res)=>{
         const jwtToken = req.cookies.jwtToken;
         const loggedInUser = await User.findOne({"authToken" : jwtToken});
         const alreadyFollowing = loggedInUser.following?.indexOf(userName)
-        console.log("alreadyFollowing => " , alreadyFollowing)
+
         if(alreadyFollowing >=0){
             loggedInUser.following.splice(alreadyFollowing , 1);
             loggedInUser.save();
@@ -168,7 +168,7 @@ router.post('/followUser' , async (req , res)=>{
 })
 router.post('/getFollowerPost', async (req , res)=>{
     const username  = req.body.username;
-    console.log(username)
+    
     const availUser = await User.findOne({"username" : username})
     if(availUser){
         return res.status(201).json({post : availUser.userPost.postContainer , profilePicture : availUser.profilePicture , username : availUser.username});
@@ -178,11 +178,10 @@ router.post('/getFollowerPost', async (req , res)=>{
 router.post('/like',async (req , res)=>{
     const username = req.body.username;
     const likedBy = req.body.likedBy;
-    console.log(likedBy , "liked =>" , username , "Post")
     const img = req.body.image;
     const validUser = await User.findOne({"username" : username});
     if(validUser){
-        console.log("user Verified");
+      
         validUser.userPost.postContainer.map((posts)=>{
             posts.image == img ? posts.like.findIndex(x=> x.user == likedBy) == -1 ? posts.like.push({user:likedBy}) : posts.like.splice(posts.like.findIndex(x=> x.user == likedBy),1) : null;
           })
@@ -195,12 +194,12 @@ router.post('/like',async (req , res)=>{
 
 router.post('/fetch-comments' , async (req ,res)=>{
     const username = req.body.username;
-    console.log(username);
+   
     const img = req.body.image;
-    console.log(img)
+   
     const validUser = await User.findOne({"username" : username});
     if(validUser){
-        console.log("user Verified")
+       
         validUser.userPost.postContainer.map((posts)=>{
             return  posts.image == img ? res.status(201).json({comments : posts.comments}):null
           })
@@ -220,8 +219,6 @@ router.post('/add-comments', async(req , res)=>{
         return res.status(400).json({message : "Enter any comments"})
     }
 
-    console.log(commentedby , commentedOn , img , caption)
-
     const validUser = await User.findOne({"username" : commentedOn});
     if(validUser){
         validUser.userPost.postContainer.map((posts)=>{
@@ -232,6 +229,19 @@ router.post('/add-comments', async(req , res)=>{
         }
 
         return res.status(400).json({message : "Unable to post comment"});
+})
+router.post('/addPost' , async(req , res)=>{
+    const {username , bio} = req.body;
+    
+    const validUser = await User.findOne({"username" : username});
+    if(validUser){
+        validUser.bio = bio;
+        validUser.save();
+        return res.status(201).json({message : "bio updated"})
+    }
+
+    return res.status(400).json({message : "user not found"})
+
 })
 }
 

@@ -64,8 +64,6 @@ export const CreatePost = (props : Props) =>{
         const {
           target: { value },
         } = event;
-       console.log(value)
-       console.log(value.toString())
        setPost(
         {
             ...post,
@@ -76,7 +74,6 @@ export const CreatePost = (props : Props) =>{
       };
 
     const handleCaption = (event: React.ChangeEvent<HTMLTextAreaElement>) =>{
-        console.log(event.currentTarget.value)
         setPost({
             ...post,
             caption : event.currentTarget.value
@@ -103,14 +100,10 @@ export const CreatePost = (props : Props) =>{
 
         })
         const data = await res.json()
-        console.log(data)
     }
 
     const handleFormSubmit = (e : React.FormEvent<HTMLFormElement>) =>{
         e.preventDefault();
-        console.log(e.currentTarget.caption.value)
-        console.log(e.currentTarget.image.value)
-        console.log(e.currentTarget.tagged.value)
         const userData = {
             caption : e.currentTarget.caption.value,
             image : e.currentTarget.image.files[0],

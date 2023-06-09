@@ -1,4 +1,4 @@
-console.log("middleware")
+
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 
@@ -10,9 +10,7 @@ cloudinary.config({
   });
 
 async function uploadToCloudinary(localFilePath , file) {
-    console.log("middleware function");
-    
-    console.log("local file path = " , localFilePath)
+
     
     var mainFolderName = "main"
     var filePathOnCloudinary = mainFolderName + "/uploads/"+file.filename

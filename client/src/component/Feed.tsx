@@ -24,7 +24,7 @@ export const Feed = (props : Props) =>{
             postObj.post?.map((post : any)=>transformedArray.push({...post , username : postObj.username , profilePicture : postObj.profilePicture}))
         })
 
-        console.log("transformed array =>" , transformedArray)
+       
 
 
 
@@ -35,7 +35,7 @@ export const Feed = (props : Props) =>{
         transformedArray.sort((a,b)=>{
             return new Date(b.date).valueOf() - new Date(a.date).valueOf()
         })
-        console.log("followed post => " ,followedPost)
+      
         setFollowedPost(transformedArray);
     }
 
@@ -55,7 +55,7 @@ export const Feed = (props : Props) =>{
             return data
         }))
         profileFeed(user)
-        console.log("all user =>" , user)
+       
     }
 
     const handleLike = async (username : string , image : string) =>{
@@ -72,7 +72,7 @@ export const Feed = (props : Props) =>{
             })
         })
         const data = await res.json();
-        console.log(data);
+    
         setForceRender(!forceRender);
     }
     
@@ -126,7 +126,7 @@ export const Feed = (props : Props) =>{
                 }
             </div>
             {/*Comments*/}
-            <div className="fixed hidden w-full h-100 rounded drop-shadow-2xl bg-white z-999" ref={commentSectionRef}>
+            <div className="fixed hidden w-full h-100 rounded overflow-y-scroll drop-shadow-2xl bg-white z-999" ref={commentSectionRef}>
                 <CommentSection username={selectedComments.username} image={selectedComments.image} openComment={openComment} userData = {userData.username}/>
             </div>
         </div>

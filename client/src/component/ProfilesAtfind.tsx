@@ -19,7 +19,8 @@ type Props = {
     following : Array<string>,
     username : string
   },
-  userData : userDataType
+  userData : userDataType,
+  isProfilePage ?: boolean
 }
 
 
@@ -30,12 +31,13 @@ export const ProfilesAtfind = ( props : Props) =>{
   const posts = user.userPost.postContainer.length
   const following = user.following.length;
 
+  const isProfilePage = props.isProfilePage;
+
   const [followed , setFollowing] = useState<boolean>(false)
 
   const followUser = async (e : React.FormEvent<HTMLFormElement>) =>{
     e.preventDefault();    
     const userName = user.username;
-    console.log("username => " , userName)
 
     const res = await fetch('/followUser', {
       method : "POST",
@@ -49,7 +51,7 @@ export const ProfilesAtfind = ( props : Props) =>{
     credentials : 'include'
     })
     const data = await res.json();
-    console.log(data)
+   
     setFollowing(!followed);
   }
 
@@ -122,7 +124,7 @@ export const ProfilesAtfind = ( props : Props) =>{
 
     return(
         <>
-        {alreadyFollowing >=0 ? null :
+        {alreadyFollowing >=0 ? isProfilePage ?  <FollowingCard /> : null :
          <FollowingCard />}
         </>
     )
