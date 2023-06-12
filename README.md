@@ -1,7 +1,7 @@
 # raftlabs
-# steps to clone this local repo to the system /
+# steps to clone this local repo to the system 
 # Frontend
-1 Clone the repository to your system./
+1 Clone the repository to your system. </br>
  1.1 Open integrated terminal and open client cd client/
  1.2 Now in terminal rum npm install/
  1.2 After installing all packages run npm rum start/
